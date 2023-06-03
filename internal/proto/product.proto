@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package product.handler.v1;
+
+option go_package = "internal/proto";
+
+import "google/protobuf/empty.proto";
+
+service ProductHandler {
+  rpc Email(EmailRequest) returns (google.protobuf.Empty) {}
+  rpc Sms(SmsRequest) returns (google.protobuf.Empty) {}
+  rpc List(ListRequest) returns (google.protobuf.Empty) {}
+}
+
+message EmailRequest {
+  enum BodyFormat {
+    _UNSPECIFIED = 0;
+    TEXT = 1;
+    HTML = 2;
+  }
+
+  string subject = 1;
+  string body = 2;
+  repeated string to = 3;
+  BodyFormat bodyType = 4;
+}
+
+
+message SmsRequest {
+  string subject = 1;
+  string body = 2;
+  repeated string to = 3;
+}
+
+message ListRequest {
+}
