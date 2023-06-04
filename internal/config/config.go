@@ -88,6 +88,11 @@ func New() (*Config, error) {
 		err = os.Setenv("MAIL_SEND_TOPIC", mailSendTopic)
 	}
 
+	if err != nil {
+		fmt.Printf("Env var error: %s", err.Error())
+		return nil, err
+	}
+
 	jsonBytes, err := os.ReadFile("config/config.json")
 	if err != nil {
 		fmt.Printf("Open config error: %s", err.Error())
