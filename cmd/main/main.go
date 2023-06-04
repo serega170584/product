@@ -1,9 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"google.golang.org/grpc"
+	"net"
 	"product/internal/config"
+	"product/internal/proto"
+	"product/internal/server"
 )
 
 func main() {
@@ -13,15 +16,16 @@ func main() {
 		panic(err)
 	}
 
-	str, err := json.Marshal(conf)
+	lis, err := net.Listen("tcp", net.JoinHostPort(conf.App.Host, conf.App.Port))
+	if err != nil {
+		fmt.Printf("Listen error: %s", err.Error())
+	}
 
-	fmt.Printf("Config: %s", string(str))
-	//appName := product
-	//appHost := localhost
-	//appPort := 4447
-	//mailFrom := test@test.ru
-	//mailHost := smtp.gmail.com
-	//mailPort := 587
-	//mailSendTopic := send_message
+	grpcServer := grpc.NewServer()
+	productServer := server.ProductHandlerServer{}
+	proto.RegisterProductHandlerServer(grpcServer, productServer)
 
+	if err = grpcServer.Serve(lis); err != nil {
+		fmt.Printf("Server error: %s", err.Error())
+	}
 }
