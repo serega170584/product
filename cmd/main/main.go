@@ -1,12 +1,8 @@
 package main
 
 import (
-	"fmt"
-	"google.golang.org/grpc"
-	"net"
+	"product/internal/app"
 	"product/internal/config"
-	"product/internal/proto"
-	"product/internal/server"
 )
 
 func main() {
@@ -16,16 +12,7 @@ func main() {
 		panic(err)
 	}
 
-	lis, err := net.Listen("tcp", net.JoinHostPort(conf.App.Host, conf.App.Port))
-	if err != nil {
-		fmt.Printf("Listen error: %s", err.Error())
-	}
+	appInstance := app.New(conf.App)
+	appInstance.Run()
 
-	grpcServer := grpc.NewServer()
-	productServer := server.ProductHandlerServer{}
-	proto.RegisterProductHandlerServer(grpcServer, productServer)
-
-	if err = grpcServer.Serve(lis); err != nil {
-		fmt.Printf("Server error: %s", err.Error())
-	}
 }
