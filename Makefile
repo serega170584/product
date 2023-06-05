@@ -1,3 +1,5 @@
+-include .env
+
 all: proto build run
 .PHONY: all
 
