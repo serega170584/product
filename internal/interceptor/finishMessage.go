@@ -1,9 +1,9 @@
-package messageInterceptor
+package interceptor
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/grpclog"
 	"time"
 )
 
@@ -18,6 +18,6 @@ func FinishMessageInterceptor(
 ) error {
 	start := time.Now()
 	err := invoker(ctx, method, req, reply, cc, opts...)
-	grpclog.Info("Invoked rpc method: %s, duration: %v, err: %s", method, time.Since(start), err.Error())
+	fmt.Printf("Invoked rpc method: %s, duration: %s, err: %v", method, time.Since(start), err)
 	return err
 }
