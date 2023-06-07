@@ -35,6 +35,7 @@ func main() {
 		net.JoinHostPort(conf.App.Host, conf.App.Port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(interceptor.FinishMessageInterceptor),
+		grpc.WithUnaryInterceptor(interceptor.ClientAuthTokenInterceptor),
 	)
 	if err != nil {
 		panic(err)

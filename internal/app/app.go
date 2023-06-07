@@ -5,6 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"net"
 	"product/internal/config"
+	"product/internal/interceptor"
 	"product/internal/proto"
 	"product/internal/server"
 )
@@ -25,7 +26,7 @@ func (appInstance *App) Run() {
 		fmt.Printf("Listen error: %s", err.Error())
 	}
 
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(interceptor.ServerAuthTokenInterceptor))
 	productServer := server.ProductHandlerServer{}
 	proto.RegisterProductHandlerServer(grpcServer, productServer)
 
