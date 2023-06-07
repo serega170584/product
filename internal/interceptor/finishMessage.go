@@ -18,6 +18,6 @@ func FinishMessageInterceptor(
 ) error {
 	start := time.Now()
 	err := invoker(ctx, method, req, reply, cc, opts...)
-	fmt.Printf("Invoked rpc method: %s, duration: %s, err: %v", method, time.Since(start), err)
+	fmt.Printf("Invoked rpc method: %s, duration: %s, err: %v, request: %v, reply: %v", method, time.Since(start), err, req, reply)
 	return err
 }

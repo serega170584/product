@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProductHandlerClient interface {
-	Email(ctx context.Context, in *EmailRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	Email(ctx context.Context, in *EmailRequest, opts ...grpc.CallOption) (*EmailReply, error)
 	Sms(ctx context.Context, in *SmsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -36,8 +36,8 @@ func NewProductHandlerClient(cc grpc.ClientConnInterface) ProductHandlerClient {
 	return &productHandlerClient{cc}
 }
 
-func (c *productHandlerClient) Email(ctx context.Context, in *EmailRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *productHandlerClient) Email(ctx context.Context, in *EmailRequest, opts ...grpc.CallOption) (*EmailReply, error) {
+	out := new(EmailReply)
 	err := c.cc.Invoke(ctx, "/product.handler.v1.ProductHandler/Email", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (c *productHandlerClient) List(ctx context.Context, in *ListRequest, opts .
 // All implementations must embed UnimplementedProductHandlerServer
 // for forward compatibility
 type ProductHandlerServer interface {
-	Email(context.Context, *EmailRequest) (*emptypb.Empty, error)
+	Email(context.Context, *EmailRequest) (*EmailReply, error)
 	Sms(context.Context, *SmsRequest) (*emptypb.Empty, error)
 	List(context.Context, *ListRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedProductHandlerServer()
@@ -77,7 +77,7 @@ type ProductHandlerServer interface {
 type UnimplementedProductHandlerServer struct {
 }
 
-func (UnimplementedProductHandlerServer) Email(context.Context, *EmailRequest) (*emptypb.Empty, error) {
+func (UnimplementedProductHandlerServer) Email(context.Context, *EmailRequest) (*EmailReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Email not implemented")
 }
 func (UnimplementedProductHandlerServer) Sms(context.Context, *SmsRequest) (*emptypb.Empty, error) {

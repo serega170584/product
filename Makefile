@@ -8,6 +8,3 @@ proto:
 
 build:
 	go build product/cmd/main
-
-run:
-	./main
