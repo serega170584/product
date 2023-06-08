@@ -11,6 +11,7 @@ import (
 	"product/internal/interceptor"
 	"product/internal/proto"
 	"product/internal/task/manager"
+	"sync"
 	"time"
 )
 
@@ -70,17 +71,10 @@ func main() {
 		fmt.Printf("Send email error: %s \n", err.Error())
 	}
 
+	waitGroup := &sync.WaitGroup{}
 	count := 8
-	ch := make(chan bool, count)
-
-	fmt.Println("Before goroutine")
-	taskManager := manager.NewManager(ch, count)
+	waitGroup.Add(count)
+	taskManager := manager.NewManager(count, waitGroup)
 	err = taskManager.Execute()
-	if err != nil {
-		fmt.Println("Task manager error")
-	}
-	fmt.Println("After goroutine")
-
-	for len(ch) > 0 {
-	}
+	waitGroup.Wait()
 }

@@ -2,28 +2,28 @@ package manager
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
 type Manager struct {
-	ch    chan bool
-	count int
+	count     int
+	waitGroup *sync.WaitGroup
 }
 
-func NewManager(mainChannel chan bool, cnt int) *Manager {
-	for i := 0; i < cnt; i++ {
-		mainChannel <- false
-	}
-	return &Manager{count: cnt, ch: mainChannel}
+func NewManager(cnt int, wg *sync.WaitGroup) *Manager {
+	return &Manager{count: cnt, waitGroup: wg}
 }
 
 func (manager *Manager) Execute() error {
+	routine := func(i int) {
+		defer manager.waitGroup.Done()
+		time.Sleep(10 * time.Second)
+		fmt.Printf("Task number %d\n", i)
+	}
+
 	for i := 0; i < manager.count; i++ {
-		go func(i int) {
-			time.Sleep(time.Duration(10 * time.Second))
-			fmt.Printf("Task number %d\n", i)
-			<-manager.ch
-		}(i)
+		go routine(i)
 	}
 	return nil
 }
