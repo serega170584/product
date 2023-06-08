@@ -10,10 +10,15 @@ import (
 	"product/internal/config"
 	"product/internal/interceptor"
 	"product/internal/proto"
+	"product/internal/task/manager"
 	"time"
 )
 
 func main() {
+	defer func(t time.Time) {
+		fmt.Printf("Duration: %v\n", time.Since(t))
+	}(time.Now())
+
 	if len(os.Args) < 5 {
 		fmt.Printf("Usage: %s <subject> <body> <bodyType> <to> ...\n", os.Args[0])
 		os.Exit(1)
@@ -62,6 +67,20 @@ func main() {
 		To:       to,
 	})
 	if err != nil {
-		fmt.Printf("Send email error: %s", err.Error())
+		fmt.Printf("Send email error: %s \n", err.Error())
+	}
+
+	count := 8
+	ch := make(chan bool, count)
+
+	fmt.Println("Before goroutine")
+	taskManager := manager.NewManager(ch, count)
+	err = taskManager.Execute()
+	if err != nil {
+		fmt.Println("Task manager error")
+	}
+	fmt.Println("After goroutine")
+
+	for len(ch) > 0 {
 	}
 }
