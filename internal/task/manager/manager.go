@@ -18,8 +18,12 @@ func NewManager(cnt int, wg *sync.WaitGroup) *Manager {
 func (manager *Manager) Execute() error {
 	routine := func(i int) {
 		defer manager.waitGroup.Done()
-		time.Sleep(10 * time.Second)
-		fmt.Printf("Task number %d\n", i)
+		ticker := time.NewTicker(10 * time.Second)
+		func() {
+			<-ticker.C
+			fmt.Printf("Task number %d\n", i)
+			ticker.Stop()
+		}()
 	}
 
 	for i := 0; i < manager.count; i++ {
