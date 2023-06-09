@@ -7,10 +7,12 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"os"
+	"os/signal"
 	"product/internal/config"
 	"product/internal/interceptor"
 	"product/internal/proto"
 	"product/internal/task/manager"
+	"runtime"
 	"sync"
 	"time"
 )
@@ -70,6 +72,15 @@ func main() {
 	if err != nil {
 		fmt.Printf("Send email error: %s \n", err.Error())
 	}
+
+	fmt.Println(runtime.NumCPU())
+
+	sigCh := make(chan os.Signal)
+	signal.Notify(sigCh, os.Interrupt)
+	go func() {
+		<-sigCh
+		fmt.Println("interrupt signal")
+	}()
 
 	waitGroup := &sync.WaitGroup{}
 	count := 8
