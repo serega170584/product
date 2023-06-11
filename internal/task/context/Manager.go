@@ -21,6 +21,9 @@ func (manager *Manager) Execute(ctx context.Context) {
 }
 
 func doneContext(ctx context.Context) {
+	defer func() {
+		fmt.Println("Goroutine is worked")
+	}()
 loop:
 	for {
 		select {
