@@ -13,6 +13,7 @@ import (
 	"product/internal/proto"
 	ctxm "product/internal/task/context"
 	"product/internal/task/manager"
+	"product/internal/task/notificator"
 	"runtime"
 	"sync"
 	"time"
@@ -97,5 +98,14 @@ func main() {
 	fmt.Println("Before cancel")
 	<-time.After(10 * time.Second)
 	cancel()
+	<-time.After(10 * time.Second)
 	fmt.Println("Cancel is done")
+
+	ntxManager := notificator.New(3)
+	ch := make(chan struct{}, 3)
+	ntxManager.Execute(ch)
+	<-time.After(10 * time.Second)
+	close(ch)
+	<-time.After(5 * time.Second)
+	fmt.Println("main end")
 }
