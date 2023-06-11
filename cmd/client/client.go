@@ -11,6 +11,7 @@ import (
 	"product/internal/config"
 	"product/internal/interceptor"
 	"product/internal/proto"
+	ctxm "product/internal/task/context"
 	"product/internal/task/manager"
 	"runtime"
 	"sync"
@@ -79,6 +80,7 @@ func main() {
 	signal.Notify(sigCh, os.Interrupt)
 	go func() {
 		<-sigCh
+		close(sigCh)
 		fmt.Println("interrupt signal")
 	}()
 
@@ -88,4 +90,12 @@ func main() {
 	taskManager := manager.NewManager(count, waitGroup)
 	err = taskManager.Execute()
 	waitGroup.Wait()
+
+	ctxManager := ctxm.New(3)
+	ctx, cancel := context.WithCancel(context.Background())
+	ctxManager.Execute(ctx)
+	fmt.Println("Before cancel")
+	<-time.After(10 * time.Second)
+	cancel()
+	fmt.Println("Cancel is done")
 }
