@@ -9,7 +9,7 @@ func main() {
 	writes := 1000
 	m := make(map[int]int, writes)
 	wg := sync.WaitGroup{}
-	mu := sync.Mutex{}
+	mu := sync.RWMutex{}
 	wg.Add(writes)
 	for i := 0; i < writes; i++ {
 		i := i
@@ -27,9 +27,9 @@ func main() {
 		i := i
 		go func() {
 			defer wg.Done()
-			mu.Lock()
+			mu.RLock()
 			_, _ = m[i]
-			mu.Unlock()
+			mu.RUnlock()
 		}()
 	}
 
