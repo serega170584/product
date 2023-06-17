@@ -6,34 +6,67 @@ import (
 )
 
 func main() {
-	writes := 1000
-	m := make(map[int]int, writes)
-	wg := sync.WaitGroup{}
-	mu := sync.RWMutex{}
-	wg.Add(writes)
-	for i := 0; i < writes; i++ {
+	cnt := 10
+	m := make(map[int]int, cnt)
+	mu := &sync.Mutex{}
+
+	counter := NewCounter(mu)
+	counter.addCount(cnt)
+
+	for i := 0; i < cnt; i++ {
 		i := i
 		go func() {
-			defer wg.Done()
+			defer counter.done()
 			mu.Lock()
 			m[i] = i
 			mu.Unlock()
 		}()
 	}
 
-	reads := 1000
-	wg.Add(reads)
-	for i := 0; i < reads; i++ {
+	counter.addCount(cnt)
+
+	for i := 0; i < cnt; i++ {
 		i := i
 		go func() {
-			defer wg.Done()
-			mu.RLock()
-			_, _ = m[i]
-			mu.RUnlock()
+			defer counter.done()
+			mu.Lock()
+			fmt.Printf("Elem: %d\n", m[i])
+			mu.Unlock()
 		}()
 	}
 
-	wg.Wait()
+	counter.wait()
+}
 
-	fmt.Println(m)
+type Counter struct {
+	cnt int
+	mu  *sync.Mutex
+}
+
+func NewCounter(mu *sync.Mutex) *Counter {
+	counter := &Counter{}
+	counter.mu = mu
+
+	return counter
+}
+
+func (counter *Counter) addCount(cnt int) {
+	counter.mu.Lock()
+	defer counter.mu.Unlock()
+	counter.cnt = cnt + counter.cnt
+}
+
+func (counter *Counter) done() {
+	counter.mu.Lock()
+	defer counter.mu.Unlock()
+	counter.cnt--
+}
+
+func (counter *Counter) wait() {
+loop:
+	for {
+		if counter.cnt == 0 {
+			break loop
+		}
+	}
 }
