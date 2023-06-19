@@ -4,43 +4,47 @@ import "fmt"
 
 func main() {
 	ch1 := make(chan int, 3)
-	ch1 <- 1
-	ch1 <- 2
-	ch1 <- 3
+	ch1 <- 123
+	ch1 <- 456
+	ch1 <- 789
 	ch2 := make(chan int, 3)
-	ch2 <- 4
-	ch2 <- 5
-	ch2 <- 6
+	ch2 <- 1234
+	ch2 <- 5678
+	ch2 <- 9012
 	ch3 := make(chan int, 3)
-	ch3 <- 7
-	ch3 <- 8
-	ch3 <- 9
+	ch3 <- 12340
+	ch3 <- 67890
+	ch3 <- 12345
 
 	ch := mergeChannels(ch1, ch2, ch3)
+
 	for val := range ch {
 		fmt.Println(val)
 	}
 }
 
 func mergeChannels(chList ...chan int) chan int {
-	res := make(chan int)
-	counter := make(chan struct{})
-	cnt := 0
+	length := 0
+	counter := make(chan int)
+	for _, ch := range chList {
+		length = length + len(ch)
+	}
+
+	res := make(chan int, length)
 
 	for _, chVals := range chList {
-		cnt = cnt + len(chVals)
 		chVals := chVals
 		go func() {
-			for chVal := range chVals {
-				res <- chVal
-				counter <- struct{}{}
+			for val := range chVals {
+				res <- val
+				length--
+				counter <- length
 			}
 		}()
 	}
 
 	go func() {
-		for range counter {
-			cnt--
+		for cnt := range counter {
 			if cnt == 0 {
 				close(res)
 			}
