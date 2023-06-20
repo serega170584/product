@@ -7,23 +7,12 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"net"
 	"os"
-	"os/signal"
 	"product/internal/config"
-	"product/internal/interceptor"
 	"product/internal/proto"
-	ctxm "product/internal/task/context"
-	"product/internal/task/manager"
-	"product/internal/task/notificator"
-	"runtime"
-	"sync"
 	"time"
 )
 
 func main() {
-	defer func(t time.Time) {
-		fmt.Printf("Duration: %v\n", time.Since(t))
-	}(time.Now())
-
 	if len(os.Args) < 5 {
 		fmt.Printf("Usage: %s <subject> <body> <bodyType> <to> ...\n", os.Args[0])
 		os.Exit(1)
@@ -41,12 +30,7 @@ func main() {
 		panic(err)
 	}
 
-	conn, err := grpc.Dial(
-		net.JoinHostPort(conf.App.Host, conf.App.Port),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithUnaryInterceptor(interceptor.FinishMessageInterceptor),
-		grpc.WithUnaryInterceptor(interceptor.ClientAuthTokenInterceptor),
-	)
+	conn, err := grpc.Dial(net.JoinHostPort(conf.App.Host, conf.App.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
@@ -72,40 +56,6 @@ func main() {
 		To:       to,
 	})
 	if err != nil {
-		fmt.Printf("Send email error: %s \n", err.Error())
+		fmt.Printf("Send email error: %s", err.Error())
 	}
-
-	fmt.Println(runtime.NumCPU())
-
-	sigCh := make(chan os.Signal)
-	signal.Notify(sigCh, os.Interrupt)
-	go func() {
-		<-sigCh
-		close(sigCh)
-		fmt.Println("interrupt signal")
-	}()
-
-	waitGroup := &sync.WaitGroup{}
-	count := 8
-	waitGroup.Add(count)
-	taskManager := manager.NewManager(count, waitGroup)
-	err = taskManager.Execute()
-	waitGroup.Wait()
-
-	ctxManager := ctxm.New(3)
-	ctx, cancel := context.WithCancel(context.Background())
-	ctxManager.Execute(ctx)
-	fmt.Println("Before cancel")
-	<-time.After(10 * time.Second)
-	cancel()
-	<-time.After(10 * time.Second)
-	fmt.Println("Cancel is done")
-
-	ntxManager := notificator.New(3)
-	ch := make(chan struct{}, 3)
-	ntxManager.Execute(ch)
-	<-time.After(10 * time.Second)
-	close(ch)
-	<-time.After(5 * time.Second)
-	fmt.Println("main end")
 }
