@@ -21,12 +21,12 @@ func (handler ProductHandlerServer) Email(ctx context.Context, request *proto.Em
 func validate(request *proto.EmailRequest) error {
 	var err error
 
-	if request.GetTo() == nil {
-		err = servererr.New("To", nil, err)
+	if len(request.GetTo()) == 0 {
+		err = servererr.NewToError(nil, err)
 	}
 
 	if request.GetBodyType() == proto.EmailRequest__UNSPECIFIED {
-		err = servererr.New("To", request.GetBodyType(), err)
+		err = servererr.NewBodyTypeError(request.GetBodyType(), err)
 	}
 
 	return err
