@@ -2,8 +2,8 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"product/internal/proto"
+	servererr "product/internal/server/error"
 )
 
 type ProductHandlerServer struct {
@@ -11,6 +11,23 @@ type ProductHandlerServer struct {
 }
 
 func (handler ProductHandlerServer) Email(ctx context.Context, request *proto.EmailRequest) (*proto.EmailReply, error) {
-	fmt.Printf("Listen good, request: %v \n", request)
+	err := validate(request)
+	if err != nil {
+		return &proto.EmailReply{Success: false}, err
+	}
 	return &proto.EmailReply{Success: true}, nil
+}
+
+func validate(request *proto.EmailRequest) error {
+	var err error
+
+	if request.GetTo() == nil {
+		err = servererr.New("To", nil, err)
+	}
+
+	if request.GetBodyType() == proto.EmailRequest__UNSPECIFIED {
+		err = servererr.New("To", request.GetBodyType(), err)
+	}
+
+	return err
 }
