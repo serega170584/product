@@ -1,6 +1,6 @@
 -include .env
 
-all: proto build run
+all: proto build run cover
 .PHONY: all
 
 proto:
@@ -8,3 +8,7 @@ proto:
 
 build:
 	go build product/cmd/main
+
+cover:
+	go test -short --count=1 -race -coverprofile=coverage.out
+	go tool cover --html=coverage.out
