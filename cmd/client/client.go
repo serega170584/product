@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"product/internal/config"
-	"product/internal/interceptor"
 	"product/internal/proto"
 	"time"
 )
@@ -31,11 +30,7 @@ func main() {
 		panic(err)
 	}
 
-	conn, err := grpc.Dial(
-		net.JoinHostPort(conf.App.Host, conf.App.Port),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithUnaryInterceptor(interceptor.FinishMessageInterceptor),
-	)
+	conn, err := grpc.Dial(net.JoinHostPort(conf.App.Host, conf.App.Port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
