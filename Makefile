@@ -10,5 +10,5 @@ build:
 	go build product/cmd/main
 
 cover:
-	go test -short --count=1 -race -coverprofile=coverage.out
-	go tool cover --html=coverage.out
+	go test -short -count=1 -race -coverprofile=coverage.out product/internal/server
+	go tool cover -html=coverage.out
