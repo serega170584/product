@@ -1,6 +1,6 @@
 -include .env
 
-all: proto build run cover
+all: proto build cover
 .PHONY: all
 
 proto:
